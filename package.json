@@ -1,0 +1,10 @@
+{
+	"name":"ImageTrace",
+	"main":"./index.html",
+	"icon":"icon.png",
+	"icon_color":"white",
+	"version":"0.0.1",
+	"author":"Jonathan Ward",
+	"website":"http://github.com/FabMo/",
+	"description":"ImageTrace"
+}
