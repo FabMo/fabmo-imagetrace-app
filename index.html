@@ -520,12 +520,12 @@ function make(){
 				outline.push(outline5[i])
 			} 
 			for(i=0;i<outline.length;i++){
-				g+="g0x" + (outline[i][0].X/10).toFixed(3) + "y" + ((0-outline[i][0].Y)/10).toFixed(3) + "\n"
+				g+="g0x" + (outline[i][0].X/8).toFixed(3) + "y" + ((0-outline[i][0].Y)/8).toFixed(3) + "\n"
 				g+="g1z-0.5\n"
 				for(j=1;j<outline[i].length;j++){
-					g+="g1x" + (outline[i][j].X/10).toFixed(3) + "y" + ((0-outline[i][j].Y)/10).toFixed(3) + "\n"
+					g+="g1x" + (outline[i][j].X/8).toFixed(3) + "y" + ((0-outline[i][j].Y)/8).toFixed(3) + "\n"
 				}
-				g+="g1x" + (outline[i][0].X/10).toFixed(3) + "y" + ((0-outline[i][0].Y)/10).toFixed(3) + "\n"
+				g+="g1x" + (outline[i][0].X/8).toFixed(3) + "y" + ((0-outline[i][0].Y)/8).toFixed(3) + "\n"
 				g+="g0z3\n"
 			}
 		}
