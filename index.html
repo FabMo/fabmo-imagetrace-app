@@ -313,7 +313,7 @@ outline5 = []
 
 for(i=0;i<perf.length;i++){
 
-	if(perf[i].scale>0.8){
+	if(perf[i].scale>0.95){
 		trace.push([[perf[i].X,perf[i].Y],[50]])
 		outline5.push([])
 		outline5[outline5.length-1].push({X:perf[i].X-1,Y:perf[i].Y-1},{X:perf[i].X+1,Y:perf[i].Y-1},{X:perf[i].X+1,Y:perf[i].Y+1},{X:perf[i].X-1,Y:perf[i].Y+1})
@@ -402,6 +402,11 @@ for(i=0;i<outline1.length;i++){
 
 
 //chakin's
+//outline5.splice(0,1)
+//outline5.splice(3,1)
+
+console.log((wmax*4-2) + " " + (hmax*4-2))
+console.log(outline5[0])
 
 for(j=0;j<outline5.length;j++){
 
@@ -416,14 +421,21 @@ for(j=0;j<outline5.length;j++){
 				 p0y = p0.Y,
 				 p1x = p1.X,
 			    p1y = p1.Y
-			smooth.push({X:(0.75*p0x+0.25*p1x),Y:(0.75*p0y+0.25*p1y)})
-			smooth.push({X:(0.25*p0x+0.75*p1x),Y:(0.25*p0y+0.75*p1y)})
+			if( (p0.X>0) && (p0.Y>0) && (p1.X>0) && (p1.Y>0) && (p0.Y<(hmax*4)-1) && (p1.Y<(hmax*4)-1) ){
+				smooth.push({X:(0.75*p0x+0.25*p1x),Y:(0.75*p0y+0.25*p1y)})
+				smooth.push({X:(0.25*p0x+0.75*p1x),Y:(0.25*p0y+0.75*p1y)})
+			}			
+			else{
+				smooth.push({X:p0.X,Y:p0.Y})
+				smooth.push({X:p1.X,Y:p1.Y})
+			}
 		}
 		outline5[j]=smooth
 		smooth=[]
 		n++
 	}
 }
+
 
 //
 for(j=0;j<outline1.length;j++){
@@ -439,8 +451,14 @@ for(j=0;j<outline1.length;j++){
 				 p0y = p0.Y,
 				 p1x = p1.X,
 			    p1y = p1.Y
-			smooth.push({X:(0.75*p0x+0.25*p1x),Y:(0.75*p0y+0.25*p1y)})
-			smooth.push({X:(0.25*p0x+0.75*p1x),Y:(0.25*p0y+0.75*p1y)})
+			if( (p0.X>0) && (p0.Y>0) && (p1.X>0) && (p1.Y>0) && (p0.Y<(hmax*4)-1) && (p1.Y<(hmax*4)-1) ){
+				smooth.push({X:(0.75*p0x+0.25*p1x),Y:(0.75*p0y+0.25*p1y)})
+				smooth.push({X:(0.25*p0x+0.75*p1x),Y:(0.25*p0y+0.75*p1y)})
+			}			
+			else{
+				smooth.push({X:p0.X,Y:p0.Y})
+				smooth.push({X:p1.X,Y:p1.Y})
+			}
 		}
 		outline1[j]=smooth
 		smooth=[]
@@ -448,6 +466,8 @@ for(j=0;j<outline1.length;j++){
 	}
 
 }
+
+
 //
 for(j=0;j<outline3.length;j++){
 
@@ -462,8 +482,14 @@ for(j=0;j<outline3.length;j++){
 				 p0y = p0.Y,
 				 p1x = p1.X,
 			    p1y = p1.Y
-			smooth.push({X:(0.75*p0x+0.25*p1x),Y:(0.75*p0y+0.25*p1y)})
-			smooth.push({X:(0.25*p0x+0.75*p1x),Y:(0.25*p0y+0.75*p1y)})
+			if( (p0.X>0) && (p0.Y>0) && (p1.X>0) && (p1.Y>0) && (p0.Y<(hmax*4)-1) && (p1.Y<(hmax*4)-1) ){
+				smooth.push({X:(0.75*p0x+0.25*p1x),Y:(0.75*p0y+0.25*p1y)})
+				smooth.push({X:(0.25*p0x+0.75*p1x),Y:(0.25*p0y+0.75*p1y)})
+			}			
+			else{
+				smooth.push({X:p0.X,Y:p0.Y})
+				smooth.push({X:p1.X,Y:p1.Y})
+			}
 		}
 		outline3[j]=smooth
 		smooth=[]
