@@ -139,7 +139,7 @@
     <form method="post">
       <fieldset class="ui-field-contain">
         <label for="scale">SCALE</label>
-		  <input id="scale" type="number" value="1" min="0.01" max="20" step="0.001"/>
+		  <input id="scale" type="number" value="0.1" min="0.01" max="20" step="0.001"/>
       </fieldset>
     </form>
 
@@ -157,26 +157,18 @@
       </fieldset>
     </form>
 
-
     <form method="post" id="space">
       <fieldset class="ui-field-contain">
         <label for="spacing">SPACING (mm)</label>
 		  <input id="spacing" type="number" value="2" min="0.1" max="5" step="0.05"/>
       </fieldset>
     </form>
+
     <form method="post" id="type">
       <fieldset class="ui-field-contain">
         <label for="perf">PERF TYPE</label>
 		  <select name="perf" id="perf">
-			 <!--
-          <option value="circle45">CIRCLE 45&deg;</option>
-          <option value="circle90" selected>CIRCLE 90&deg;</option>
-          <option value="hex">HEXAGON</option>
-          <option value="square45">SQUARE 45&deg;</option>
-          <option value="square90">SQUARE 90&deg;</option>
-			 -->
           <option value="trace" selected>IMAGE TRACE</option>
-			 
         </select>
       </fieldset>
     </form>
@@ -192,18 +184,12 @@
       </fieldset>
     </form>
 
-
 </div>
   <div data-role="footer" style="text-align:center;">
-
-
     <a href="#pagezero"  onclick="sizeImg()" class="ui-btn ui-corner-all ui-shadow ui-icon-carat-r ui-btn-icon-right">ImageTrace</a>
   </div>
 </div> 
 
-<!--
-<script type="application/processing" data-processing-target="2D">
--->
 <script>
 
 function draw(){
@@ -227,6 +213,7 @@ function draw(){
 	//ctx.rect(0,0,(wmax*spacing*sf*2),ctx.canvas.height)
 	//ctx.fillStyle='#444'
 	//ctx.fill()
+
 	ctx.translate(3,3)
 
 	ctx.strokeStyle="#333"
@@ -250,7 +237,6 @@ function draw(){
 		ctx.stroke()
 	}
 
-
 	for(i=0;i<outline5.length;i++){
 		ctx.beginPath()
 		for(j=0;j<outline5[i].length;j++){
@@ -260,19 +246,14 @@ function draw(){
 		ctx.stroke()
 	}
 
-
-
 }
-
 
 $(window).resize(function(){
 	draw()
 })
 
 //TODO
-
-//scale image
-//set cut depth/speed
+//
 //progress bar
 //
 
@@ -306,7 +287,6 @@ function sizeImg(){
 	raster.visible = false
 	wmax = parseInt(raster.width/raster.height*hmax)
 
-
 	document.getElementById("width").value = ((document.getElementById("scale").value)*(wmax*4)).toFixed(1)
 	document.getElementById("height").value = ((document.getElementById("scale").value)*(hmax*4)).toFixed(1)
 
@@ -329,7 +309,7 @@ for (var y = 0; y < raster.height; y++) {
 	}
 }
 
-//min hole
+//min 
 for(i=0;i<perf.length;i++){
 	if(perf[i].scale<0.1){
 		perf[i].scale=0.1
@@ -344,7 +324,7 @@ outline5 = []
 
 for(i=0;i<perf.length;i++){
 
-	if(perf[i].scale>0.95){
+	if(perf[i].scale>0.8){
 		trace.push([[perf[i].X,perf[i].Y],[50]])
 		outline5.push([])
 		outline5[outline5.length-1].push({X:perf[i].X-1,Y:perf[i].Y-1},{X:perf[i].X+1,Y:perf[i].Y-1},{X:perf[i].X+1,Y:perf[i].Y+1},{X:perf[i].X-1,Y:perf[i].Y+1})
@@ -357,7 +337,6 @@ for(i=0;i<perf.length;i++){
 	}
 	else if(perf[i].scale<0.2){
 		trace.push([[perf[i].X,perf[i].Y],[250]])
-
 		outline1.push([])
 		outline1[outline1.length-1].push({X:perf[i].X-1,Y:perf[i].Y-1},{X:perf[i].X+1,Y:perf[i].Y-1},{X:perf[i].X+1,Y:perf[i].Y+1},{X:perf[i].X-1,Y:perf[i].Y+1})
 
@@ -537,6 +516,7 @@ function make(){
 
 	var depth = (document.getElementById("cut-depth").value)
 	var scale = (document.getElementById("scale").value)
+		g=""
 
 	if(document.getElementById("output").value=="gcode"){
 
