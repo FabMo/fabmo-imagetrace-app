@@ -1,630 +1,317 @@
 <!DOCTYPE html>
 <html lang="en"> 
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8"/>
-<link rel="stylesheet" href="css/jquery.mobile-1.4.5.css">
+	<head>
+		<meta charset="utf-8">
+		<title>Image Trace</title>
+		<link href="css/style.css" rel="stylesheet">
+		<script src="js/libs/jquery.js"></script>
+		<script src="js/libs/clipper.js"></script>
+		<script src="js/libs/fabmo.min.js"></script>
 
-<script src="js/libs/jquery-1.11.2.min.js"></script>
-<script src="js/libs/fabmo.js"></script>
-    <script type="text/javascript">
-        var fabmo = new FabMoDashboard();
-    </script>
-<script src="js/libs/jquery.mobile-1.4.5.js"></script>
-<script src="js/libs/paper.js"></script>
-<script src="js/libs/clipper.js"></script>
-<script src="js/libs/simplify.js"></script>
+	</head>
+	<body>
+		<input type="file" id="file" onchange="startRead()"/>
+		<input type="submit" id="get" value="load image" onclick="getFile()"/>
 
-<style>
+		<input type="submit" id="settings" value="settings"/>
 
-#load {
-  position: relative;
-  overflow: hidden;
-  float: center;
-  margin-right: 4px;
-}
-#load input {
-  position: absolute;
-  top: 0;
-  right: 0;
-  margin: 0;
-  opacity: 0;
-  filter: alpha(opacity=0);
-  transform: translate(-300px, 0) scale(4);
-  font-size: 23px;
-  direction: ltr;
-  cursor: pointer;
-}
+		<input type="submit" id="submit_outline" value="cut outline" onclick="makeOutline()"/>
 
-#image {
-   display:none;
-}
-#image2 {
-   display:none;
-}
+		<input type="submit" id="submit_raster" value="cut raster" onclick="makeRaster()"/>
+		
+		
 
-#myCanvas {
-   display:none;
-}
-#downloadLink {
-   display:none;
-}
-#space {
-   display:none;
-}
-#type {
-   display:none;
-}
-#ext {
-   display:none;
-}
+		<progress id="progress" value="0" max="100"></progress>
+		<p>
 
-#px{
-	display:none;
-}
+		<canvas id="myCanvas"></canvas>
+		<canvas id="myCanvas2"></canvas>
+		<input type="submit" id="invert" value="invert" onclick="Invert()"/>
+		<input type="submit" id="mirror" value="mirror" onclick="Mirror()"/>
 
-</style>
+		<input type="number" id="width" value="0" min="1" onchange="changeWidth()" autocomplete="on"/>
+		<width>width:</width>
 
-<img src="img/image.png" id="image" alt="img"/>
-<img src="img/image.png" id="image2" alt="img"/>
+		<input type="number" id="height" value="60" min="1" onchange="changeHeight()" autocomplete="on"/>
+		<height>height:</height>
+		<depth>depth:</depth>
+		<mm1>mm</mm1>
+		<mm2>mm</mm2>
+		<mm3>mm</mm3>
 
-<canvas id="myCanvas"> </canvas>
+		<input type="number" id="depth" value="-1" step="0.1" max="0" autocomplete="on"/>
 
-</head>
-
-<body onload="draw(); sizeImg();">
-<div data-role="page" id="pagezero">
-  <div data-role="header">
-    <a href="#" class="ui-btn ui-corner-all ui-shadow ui-icon-eye ui-btn-icon-left" onclick="toggleFullScreen();">FULLSCREEN</a>
-    <h1>LOAD IMAGE</h1>
-	 <!--
-    <a href="#" class="ui-btn ui-corner-all ui-shadow ui-icon-info ui-btn-icon-left" onclick="jobInfo();">JOB INFO</a>
-	 -->
-    <div data-role="navbar">
-      <ul>
-        <li><a href="#pageone">SETUP</a></li>
-        <li><a href="#pagezero" class="ui-btn-active ui-state-persist">ImageTrace</a></li>
-      </ul>
-    </div>
-  </div>
-  <div data-role="main" class="ui-content" id="container">
-    <canvas id="2D"> </canvas>
-  </div>
-  <div data-role="footer" style="text-align:center;">
-	<!--
-   cutout:
-   <input type="checkbox" data-role="flipswitch" name="cutout" id="cutout" onclick="cutOut();" checked/>
-	-->
-    <span class="ui-btn ui-corner-all ui-shadow ui-icon-plus ui-btn-icon-left" onchange="startRead()" id="load">
-       <span>LOAD IMAGE</span>
-       <input type="file" name="files[]" id="file" multiple data-role="none"/>
-    </span>
-    <a href="#" class="ui-btn ui-corner-all ui-shadow ui-icon-action ui-btn-icon-right" onclick="make();">SUBMIT JOB</a>
-	 <a href="#" class="ui-btn ui-corner-all ui-shadow ui-icon-action ui-btn-icon-right" id="downloadLink" onclick="make();">Download</a>
-  </div>
-</div> 
-<div data-role="page" id="pageone">
-  <div data-role="header">
-    <h1>SETTINGS  </h1>
-    <a href="#" class="ui-btn ui-corner-all ui-shadow ui-icon-eye ui-btn-icon-left" onclick="toggleFullScreen();">FULLSCREEN</a>
-    <div data-role="navbar">
-      <ul>
-        <li><a href="#pageone" class="ui-btn-active ui-state-persist">SETUP</a></li>
-        <li><a href="#pagezero" onclick="draw();">ImageTrace</a></li>
-      </ul>
-    </div>
-  </div>
-  <div data-role="main" class="ui-content">
-
-    <form method="post" id="px">
-      <fieldset class="ui-field-contain">
-        <label for="dots">HEIGHT (pixels)</label>
-		  <input id="dots" type="number" value="140" min="5" max="150" step="1"/>
-      </fieldset>
-    </form>
-
-    <form method="post">
-      <fieldset class="ui-field-contain">
-        <label for="cut-depth">CUT DEPTH (mm)</label>
-		  <input id="cut-depth" type="number" value="-0.5" min="-3" max="0" step="0.1"/>
-      </fieldset>
-    </form>
-
-    <form method="post">
-      <fieldset class="ui-field-contain">
-        <label for="feedrate">FEEDRATE (mm/min)</label>
-		  <input id="feedrate" type="number" value="300" min="100" max="1500" step="10"/>
-      </fieldset>
-    </form>
-
-    <form method="post">
-      <fieldset class="ui-field-contain">
-        <label for="scale">SCALE</label>
-		  <input id="scale" type="number" value="0.1" min="0.01" max="20" step="0.001"/>
-      </fieldset>
-    </form>
-
-    <form method="post">
-      <fieldset class="ui-field-contain">
-        <label for="width">WIDTH (mm)</label>
-		  <input id="width" type="text" value="0" readonly/>
-      </fieldset>
-    </form>
-
-    <form method="post">
-      <fieldset class="ui-field-contain">
-        <label for="height">HEIGHT (mm)</label>
-		  <input id="height" type="text" value="0" readonly/>
-      </fieldset>
-    </form>
-
-    <form method="post" id="space">
-      <fieldset class="ui-field-contain">
-        <label for="spacing">SPACING (mm)</label>
-		  <input id="spacing" type="number" value="2" min="0.1" max="5" step="0.05"/>
-      </fieldset>
-    </form>
-
-    <form method="post" id="type">
-      <fieldset class="ui-field-contain">
-        <label for="perf">PERF TYPE</label>
-		  <select name="perf" id="perf">
-          <option value="trace" selected>IMAGE TRACE</option>
-        </select>
-      </fieldset>
-    </form>
-
-    <form method="post" id="ext">
-      <fieldset class="ui-field-contain">
-        <label for="output">OUTPUT</label>
-        <select name="output" id="output">
-          <option value="dxf">DXF</option>
-          <option value="gcode" selected>GCODE</option>
-          <option value="sbp">SBP</option>
-        </select>
-      </fieldset>
-    </form>
-
-</div>
-  <div data-role="footer" style="text-align:center;">
-    <a href="#pagezero"  onclick="sizeImg()" class="ui-btn ui-corner-all ui-shadow ui-icon-carat-r ui-btn-icon-right">ImageTrace</a>
-  </div>
-</div> 
+		<img id="pic" src="img/cat.jpg"> 
+	</body>
+</html>
 
 <script>
 
-function draw(){
+//TODO
 
-	c = document.getElementById("2D")
-	ctx = c.getContext("2d")
+//
+//raster line spacing
+//tool diameter
+//
 
-	ctx.canvas.height = $(window).innerHeight()-180
-	ctx.canvas.width = $(window).innerWidth()-30
+//tabs
+//
 
-	if(perf.length>0){
-		var sf = (($(window).innerHeight()-180)/(perf[perf.length-1].Y+(spacing*4)));
+//raster angle
+//fade lines
+//
+
+var fabmo = new FabMoDashboard()
+
+var pix = new Object()
+
+var path = new Array()
+var raster = new Array()
+
+var getPix = true
+var invert = false
+var mirror = false
+
+var feedrate = 500
+var cutDepth = -1
+
+var sf2 = 1
+
+function changeWidth(){
+	document.getElementById("height").value = ((document.getElementById("width").value*sf2).toFixed(0))
+}
+
+function changeHeight(){
+	document.getElementById("width").value = ((document.getElementById("height").value/sf2).toFixed(0))
+}
+
+function getFile(){
+	document.getElementById("file").click()
+}
+
+function Invert(){
+
+	if(invert==false){
+		invert=true
 	}
 	else{
-		var sf=0
+		invert=false
 	}
+	getPix=true
+	draw();
+	getPix=false
+
+}
+
+function Mirror(){
+	
+	if(mirror==false){
+		mirror=true
+	}
+	else{
+		mirror=false
+	}
+	draw();
+
+}
+
+function draw() {
+
+	var c = document.getElementById('myCanvas')
+	var ctx = c.getContext("2d")
+	
+	var c2 = document.getElementById('myCanvas2')
+	var ctx2 = c2.getContext("2d")
+
+	ctx.canvas.height = $(window).innerHeight()-70
+	ctx.canvas.width = $(window).innerWidth()-20
+
+	ctx2.canvas.height = $(window).innerHeight()-70
+	ctx2.canvas.width = $(window).innerWidth()-20
 
 	ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height)
-	ctx.lineJoin="round"
 
-	//ctx.rect(0,0,(wmax*spacing*sf*2),ctx.canvas.height)
-	//ctx.fillStyle='#444'
-	//ctx.fill()
+	var img=document.getElementById("pic")
 
-	ctx.translate(3,3)
+	var imgHeight = 200 
 
-	ctx.strokeStyle="#333"
-	ctx.lineWidth=2
+	var scale = 1
 
-	for(i=0;i<outline1.length;i++){
-		ctx.beginPath()
-		for(j=0;j<outline1[i].length;j++){
-			ctx.lineTo(outline1[i][j].X*sf,outline1[i][j].Y*sf)
+	var sf = imgHeight/img.height
+	ctx2.drawImage(img,0,0,img.width*sf,imgHeight)
+
+	pix = ctx2.getImageData(0,0,img.width*sf,imgHeight)
+
+	ctx.putImageData(pix,0,0)
+
+	sf2 = img.height/img.width
+
+	document.getElementById("submit_outline").style.left= img.width*sf + 15 + "px"
+	document.getElementById("submit_raster").style.left= img.width*sf*2 + 25 + "px"
+
+	document.getElementById("width").value = ((document.getElementById("height").value/sf2).toFixed(0))
+
+	if(getPix==true){
+
+		getPix=false
+
+		var pen = false
+		var row = 0
+
+
+		raster = []
+		path = []
+
+		pix2 = pix;
+		
+		if(invert==true){
+			var ulevel = 128
+			var llevel = 0
 		}
-		ctx.lineTo(outline1[i][0].X*sf,outline1[i][0].Y*sf)
-		ctx.stroke()
+		else{
+			var ulevel = 256
+			var llevel = 128
+		}
+
+		//0.3R+0.6G+0.1B
+		raster.push([[]])
+
+		for(i=0;i<(pix.data.length);i=i+4){
+
+			if( (((pix2.data[i]*0.3)+(pix2.data[i+1]*0.6)+(pix2.data[i+2]*0.1))>=llevel) && (((pix2.data[i]*0.3)+(pix2.data[i+1]*0.6)+(pix2.data[i+2]*0.1))<=ulevel)){
+
+				if(pen==true){
+					raster[raster.length-1].push([])
+				}
+				pen=false
+				
+				pix2.data[i]=255
+				pix2.data[i+1]=255
+				pix2.data[i+2]=255
+
+			}
+			else{
+				pix2.data[i]=200
+				pix2.data[i+1]=200
+				pix2.data[i+2]=200
+
+				pen=true
+
+				if((Math.floor((i/4)/pix.width))>=row+1){
+					row=(Math.floor((i/4)/pix.width))
+					raster.push([[]])
+				}
+
+				raster[raster.length-1][raster[raster.length-1].length-1].push( i/4-((Math.floor((i/4)/pix.width))*pix.width), Math.floor((i/4)/pix.width) )
+
+				path.push([
+					{X:((i/4-((Math.floor((i/4)/pix.width))*pix.width))), Y:((Math.floor((i/4)/pix.width)))},
+					{X:((i/4-((Math.floor((i/4)/pix.width))*pix.width))+1), Y:((Math.floor((i/4)/pix.width)))}, 
+					{X:((i/4-((Math.floor((i/4)/pix.width))*pix.width))+1), Y:((Math.floor((i/4)/pix.width))+1)},
+					{X:((i/4-((Math.floor((i/4)/pix.width))*pix.width))), Y:((Math.floor((i/4)/pix.width))+1)}
+				]);
+
+			}
+		}
+		
+		var cpr = new ClipperLib.Clipper()
+		cpr.AddPaths(path, ClipperLib.PolyType.ptSubject, true)
+
+		var solution_paths = new ClipperLib.Paths()
+		cpr.Execute(ClipperLib.ClipType.ctUnion, solution_paths, ClipperLib.PolyFillType.pftNonZero, ClipperLib.PolyFillType.pftNonZero)
+
+
+		path = ClipperLib.JS.Clean(solution_paths, 2)
+
+
 	}
 
-	for(i=0;i<outline3.length;i++){
-		ctx.beginPath()
-		for(j=0;j<outline3[i].length;j++){
-			ctx.lineTo(outline3[i][j].X*sf,outline3[i][j].Y*sf)
+	ctx.translate(img.width*sf+10,0)
+
+	ctx.strokeStyle="#000"
+
+	ctx.fillStyle="#fff"
+	ctx.rect(0,0,img.width*sf,img.height*sf)
+	ctx.fill()
+	
+	ctx.beginPath()
+
+	if(mirror==false){
+	
+	for(i=0;i<path.length;i++){
+		ctx.moveTo(path[i][0].X,path[i][0].Y)
+		for(j=0;j<path[i].length;j++){
+			ctx.lineTo(path[i][j].X,path[i][j].Y)
 		}
-		ctx.lineTo(outline3[i][0].X*sf,outline3[i][0].Y*sf)
-		ctx.stroke()
+		ctx.lineTo(path[i][0].X,path[i][0].Y)
 	}
 
-	for(i=0;i<outline5.length;i++){
-		ctx.beginPath()
-		for(j=0;j<outline5[i].length;j++){
-			ctx.lineTo(outline5[i][j].X*sf,outline5[i][j].Y*sf)
+	}
+	else{
+
+	for(i=0;i<path.length;i++){
+		ctx.moveTo((img.width*sf)-path[i][0].X,path[i][0].Y)
+		for(j=0;j<path[i].length;j++){
+			ctx.lineTo((img.width*sf)-path[i][j].X,path[i][j].Y)
 		}
-		ctx.lineTo(outline5[i][0].X*sf,outline5[i][0].Y*sf)
-		ctx.stroke()
+		ctx.lineTo((img.width*sf)-path[i][0].X,path[i][0].Y)
+	}
+
+	}
+
+	ctx.stroke()
+
+	ctx.translate(img.width*sf+10,0)
+
+	ctx.lineWidth=1
+	ctx.beginPath()
+	ctx.rect(0,0,img.width*sf*scale,img.height*sf*scale)
+	ctx.fill()
+
+	//console.log(raster);
+	
+	for(i=0;i<raster.length;i+=3){
+
+		ctx.beginPath();
+		if(mirror==false){
+
+		for(j=0;j<raster[i].length;j++){
+			ctx.moveTo(raster[i][j][0]*scale,raster[i][j][1]*scale)
+			for(k=0;k<raster[i][j].length;k+=2){
+				ctx.lineTo(raster[i][j][k]*scale,raster[i][j][k+1]*scale)
+			}
+		}
+
+		}
+		else{
+
+		for(j=0;j<raster[i].length;j++){
+			ctx.moveTo((img.width*sf)-raster[i][j][0]*scale,raster[i][j][1]*scale)
+			for(k=0;k<raster[i][j].length;k+=2){
+				ctx.lineTo((img.width*sf)-raster[i][j][k]*scale,raster[i][j][k+1]*scale)
+			}
+		}
+
+
+		}
+
+		if(i%2==0){
+			ctx.strokeStyle="#0000ff"
+			ctx.stroke()
+		}
+		else{
+			ctx.strokeStyle="#000"
+			ctx.stroke()
+		}
 	}
 
 }
+
+window.onload=draw();
 
 $(window).resize(function(){
-	draw()
-})
-
-//TODO
-//
-//progress bar
-//
-
-var g = ""
-var cr = 10
-var perf = []
-var wmax
-var canvas
-var raster
-var raster2
-var image = {name:"fish.png",file:"fish"}
-var hmax 
-var spacing 
-var point
-var path
-var rgb = []
-var trace = []
-var outline = []
-
-var outline1 = []
-var outline3 = []
-var outline5 = []
-
-function sizeImg(){
-
-	hmax = parseInt(document.getElementById('dots').value)
-	spacing = parseFloat(document.getElementById('spacing').value)
-	canvas = document.getElementById('myCanvas')
-	paper.setup(canvas)
-	raster = new paper.Raster('image')
-	raster.visible = false
-	wmax = parseInt(raster.width/raster.height*hmax)
-
-	document.getElementById("width").value = ((document.getElementById("scale").value)*(wmax*4)).toFixed(1)
-	document.getElementById("height").value = ((document.getElementById("scale").value)*(hmax*4)).toFixed(1)
-
-	raster.size = new paper.Size(wmax*2, hmax*2)
-	
-   perf=[]
-
-for (var y = 0; y < raster.height; y++) {
-	if (y % 2 === 0){ 
-		for(var x = 0; x < raster.width; x++) {
-			var color = raster.getPixel(x, y)
-         perf.push({X:x*spacing,Y:y*spacing,scale:parseFloat((1 - color.gray).toFixed(3)),color:[parseInt(color._components[0]*255),parseInt(color._components[1]*255),parseInt(color._components[2]*255)]})
-		}
-	}
-	else if (y % 2 === 1){
-      for(var x = raster.width-1; x >= 0; x--) {
-			var color = raster.getPixel(x, y);
-         perf.push({X:x*spacing,Y:y*spacing,scale:parseFloat((1 - color.gray).toFixed(3)),color: [parseInt(color._components[0]*255),parseInt(color._components[1]*255),parseInt(color._components[2]*255)]})
-      }
-	}
-}
-
-//min 
-for(i=0;i<perf.length;i++){
-	if(perf[i].scale<0.1){
-		perf[i].scale=0.1
-	}
-}
-
-trace = []
-
-outline1 = []
-outline3 = []
-outline5 = []
-
-for(i=0;i<perf.length;i++){
-
-	if(perf[i].scale>0.8){
-		trace.push([[perf[i].X,perf[i].Y],[50]])
-		outline5.push([])
-		outline5[outline5.length-1].push({X:perf[i].X-1,Y:perf[i].Y-1},{X:perf[i].X+1,Y:perf[i].Y-1},{X:perf[i].X+1,Y:perf[i].Y+1},{X:perf[i].X-1,Y:perf[i].Y+1})
-	}
-	else if( (perf[i].scale<=0.7) && (perf[i].scale>0.4) ){
-		trace.push([[perf[i].X,perf[i].Y],[100]])
-		outline3.push([])
-		outline3[outline3.length-1].push({X:perf[i].X-1,Y:perf[i].Y-1},{X:perf[i].X+1,Y:perf[i].Y-1},{X:perf[i].X+1,Y:perf[i].Y+1},{X:perf[i].X-1,Y:perf[i].Y+1})
-
-	}
-	else if(perf[i].scale<0.2){
-		trace.push([[perf[i].X,perf[i].Y],[250]])
-		outline1.push([])
-		outline1[outline1.length-1].push({X:perf[i].X-1,Y:perf[i].Y-1},{X:perf[i].X+1,Y:perf[i].Y-1},{X:perf[i].X+1,Y:perf[i].Y+1},{X:perf[i].X-1,Y:perf[i].Y+1})
-
-	}
-
-}
-
-var cpr = new ClipperLib.Clipper()
-cpr.AddPaths(outline1, ClipperLib.PolyType.ptSubject, true)
-
-var solution_paths = new ClipperLib.Paths();
-cpr.Execute(ClipperLib.ClipType.ctUnion, solution_paths, ClipperLib.PolyFillType.pftNonZero, ClipperLib.PolyFillType.pftNonZero);
-
-outline1 = solution_paths
-//
-
-cpr = new ClipperLib.Clipper()
-cpr.AddPaths(outline3, ClipperLib.PolyType.ptSubject, true)
-
-solution_paths = new ClipperLib.Paths();
-cpr.Execute(ClipperLib.ClipType.ctUnion, solution_paths, ClipperLib.PolyFillType.pftNonZero, ClipperLib.PolyFillType.pftNonZero);
-
-outline3 = solution_paths
-//
-
-
-//
-cpr = new ClipperLib.Clipper()
-cpr.AddPaths(outline5, ClipperLib.PolyType.ptSubject, true)
-
-solution_paths = new ClipperLib.Paths();
-cpr.Execute(ClipperLib.ClipType.ctUnion, solution_paths, ClipperLib.PolyFillType.pftNonZero, ClipperLib.PolyFillType.pftNonZero);
-
-outline5 = solution_paths
-
-//console.log(outline1)
-
-for(i=0;i<outline1.length;i++){
-	if(outline1[i].length<15){
-		outline1.splice(i,1)
-		i--
-	}
-}
-
-for(i=0;i<outline3.length;i++){
-	if(outline3[i].length<15){
-		outline3.splice(i,1)
-		i--
-	}
-}
-
-for(i=0;i<outline5.length;i++){
-	if(outline5[i].length<15){
-		outline5.splice(i,1)
-		i--
-	}
-}
-
-
-points = outline5
-for(i=0;i<outline5.length;i++){
-	outline5[i]=simplify(points[i], 3, true)
-}
-points = outline3
-for(i=0;i<outline3.length;i++){
-	outline3[i]=simplify(points[i], 4, true)
-}
-points = outline1
-for(i=0;i<outline1.length;i++){
-	outline1[i]=simplify(points[i], 4, true)
-}
-
-//outline5.splice(0,1)
-//outline5.splice(3,1)
-
-console.log((wmax*4-2) + " " + (hmax*4-2))
-console.log(outline5[0])
-
-for(j=0;j<outline5.length;j++){
-
-	var n = 0
-	var smooth = []
-
-	while(n<3){
-		for(i=0;i<outline5[j].length-1;i++){
-			var p0 = outline5[j][i]
-			var p1 = outline5[j][i+1]
-			var p0x = p0.X,
-				 p0y = p0.Y,
-				 p1x = p1.X,
-			    p1y = p1.Y
-			if( (p0.X>0) && (p0.Y>0) && (p1.X>0) && (p1.Y>0) && (p0.Y<(hmax*4)-1) && (p1.Y<(hmax*4)-1) ){
-				smooth.push({X:(0.75*p0x+0.25*p1x),Y:(0.75*p0y+0.25*p1y)})
-				smooth.push({X:(0.25*p0x+0.75*p1x),Y:(0.25*p0y+0.75*p1y)})
-			}			
-			else{
-				smooth.push({X:p0.X,Y:p0.Y})
-				smooth.push({X:p1.X,Y:p1.Y})
-			}
-		}
-		outline5[j]=smooth
-		smooth=[]
-		n++
-	}
-}
-
-
-//
-for(j=0;j<outline1.length;j++){
-
-	var n = 0
-	var smooth = []
-
-	while(n<3){
-		for(i=0;i<outline1[j].length-1;i++){
-			var p0 = outline1[j][i]
-			var p1 = outline1[j][i+1]
-			var p0x = p0.X,
-				 p0y = p0.Y,
-				 p1x = p1.X,
-			    p1y = p1.Y
-			if( (p0.X>0) && (p0.Y>0) && (p1.X>0) && (p1.Y>0) && (p0.Y<(hmax*4)-1) && (p1.Y<(hmax*4)-1) ){
-				smooth.push({X:(0.75*p0x+0.25*p1x),Y:(0.75*p0y+0.25*p1y)})
-				smooth.push({X:(0.25*p0x+0.75*p1x),Y:(0.25*p0y+0.75*p1y)})
-			}			
-			else{
-				smooth.push({X:p0.X,Y:p0.Y})
-				smooth.push({X:p1.X,Y:p1.Y})
-			}
-		}
-		outline1[j]=smooth
-		smooth=[]
-		n++
-	}
-
-}
-
-
-//
-for(j=0;j<outline3.length;j++){
-
-	var n = 0
-	var smooth = []
-
-	while(n<3){
-		for(i=0;i<outline3[j].length-1;i++){
-			var p0 = outline3[j][i]
-			var p1 = outline3[j][i+1]
-			var p0x = p0.X,
-				 p0y = p0.Y,
-				 p1x = p1.X,
-			    p1y = p1.Y
-			if( (p0.X>0) && (p0.Y>0) && (p1.X>0) && (p1.Y>0) && (p0.Y<(hmax*4)-1) && (p1.Y<(hmax*4)-1) ){
-				smooth.push({X:(0.75*p0x+0.25*p1x),Y:(0.75*p0y+0.25*p1y)})
-				smooth.push({X:(0.25*p0x+0.75*p1x),Y:(0.25*p0y+0.75*p1y)})
-			}			
-			else{
-				smooth.push({X:p0.X,Y:p0.Y})
-				smooth.push({X:p1.X,Y:p1.Y})
-			}
-		}
-		outline3[j]=smooth
-		smooth=[]
-		n++
-	}
-
-}
-
-
-
-
-draw()
-
-}
-
-function make(){
-
-	var depth = (document.getElementById("cut-depth").value)
-	var scale = (document.getElementById("scale").value)
-		g=""
-
-	if(document.getElementById("output").value=="gcode"){
-
-		g="g21\n"
-		g+="g0z5\n"
-		g+="m4\n"
-		g+="g4p2\n"
-		g+="g1f" +  (document.getElementById("feedrate").value)  + "\n"
-		
-		for(i=0;i<outline1.length;i++){
-			outline.push(outline1[i])
-		}
-		for(i=0;i<outline3.length;i++){
-			outline.push(outline3[i])
-		} 
-		for(i=0;i<outline5.length;i++){
-			outline.push(outline5[i])
-		} 
-		for(i=0;i<outline.length;i++){
-			g+="g0x" + (outline[i][0].X*scale).toFixed(3) + "y" + ((0-outline[i][0].Y)*scale).toFixed(3) + "\n"
-			g+="g1z-0.5\n"
-			for(j=1;j<outline[i].length;j++){
-				g+="g1x" + (outline[i][j].X*scale).toFixed(3) + "y" + ((0-outline[i][j].Y)*scale).toFixed(3) + "\n"
-			}
-			g+="g1x" + (outline[i][0].X*scale).toFixed(3) + "y" + ((0-outline[i][0].Y)*scale).toFixed(3) + "\n"
-			g+="g0z3\n"
-		}
-
-		g+="g0z5\n"
-		g+="m5\n"
-		g+="g0x0y0\n"
-		g+="m30\n"
-
-		fabmo.submitJob({
-		   file : g,
-		   filename : image.name + '.g',
-		   name : image.name,
-		   description : ("width:"+(wmax*spacing)+" height:"+(hmax*spacing) +" mm")
-		})
-
-	}
-
-	else if(document.getElementById("output").value=="dxf"){
-
-		var dxf = "0\nSECTION\n2\nENTITIES\n999\nw4rd.com\n0\n"
-
-	
-			for(i=0;i<perf.length;i++){
-				dxf+="POLYLINE\n8\n0\n70\n1\n0\n"
-				for(j=0;j<=6;j++){
-					dxf+="VERTEX\n8\n0\n10\n"
-					dxf+=((perf[i].X)+Math.sin((Math.PI*2)/6*j)*(perf[i].scale)).toFixed(2)+"\n20\n"
-					dxf+=((0-(perf[i].Y)+Math.cos((Math.PI*2)/6*j)*(perf[i].scale))).toFixed(2)+"\n0\n"			
-				}
-				dxf+="SEQEND\n0\n"
-			}
-		
-
-		dxf+="ENDSEC\n0\nEOF"
-
-		var link = document.getElementById("downloadLink")
-		link.setAttribute("href", "data:text/plain;base64," + btoa(dxf))
-		link.setAttribute("download", image.name + ".dxf")
-		link.click()
-
-	}
-	else if(document.getElementById("output").value=="sbp"){
-
-		g="MS,0.25,0.1\n"
-		g+="JZ,0.2\n"
-		g+="SO,1,1\n"
-		g+="PAUSE 1\n"
-
-		g+="JZ,0.2\n"
-		g+="SO,1,0\n"
-
-		fabmo.submitJob({
-		   file : g,
-		   filename : image.name + '.sbp',
-		   name : image.name,
-		   description : ("width:"+((wmax*spacing)/25.4).toFixed(3) +" height:"+((hmax*spacing)/25.4).toFixed(3) +"\"")
-		})
-
-	}
-
-}
-
-// toggle full screen
-function toggleFullScreen() {
-  if (!document.fullscreenElement &&    // alternative standard method
-      !document.mozFullScreenElement && !document.webkitFullscreenElement) {  // current working methods
-    if (document.documentElement.requestFullscreen) {
-      document.documentElement.requestFullscreen()
-    } else if (document.documentElement.mozRequestFullScreen) {
-      document.documentElement.mozRequestFullScreen()
-    } else if (document.documentElement.webkitRequestFullscreen) {
-      document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT)
-    }
-  } else {
-    if (document.cancelFullScreen) {
-      document.cancelFullScreen()
-    } else if (document.mozCancelFullScreen) {
-      document.mozCancelFullScreen()
-    } else if (document.webkitCancelFullScreen) {
-      document.webkitCancelFullScreen()
-    }
-  }
-}
+	draw();
+});
 
 function startRead() {
     image = document.getElementById("file").files[0]
@@ -632,39 +319,117 @@ function startRead() {
         if (image.type.match("image.*")) {
             getAsImage(image)
             console.log("LOADING: " + image.name)
-				console.log(image)
         }
         else {
-              console.log("THAT IS NOT AN IMAGE FILE")
+              console.log("NOT AN IMAGE FILE")
         }
     }
 
 }
-
 function getAsImage(readFile) {
     var reader = new FileReader()
     reader.readAsDataURL(readFile)
     reader.onload = addImg
 }
 function addImg(imgsrc) {
-    var img = document.createElement("img")
-    $("#image").attr("src",imgsrc.target.result)
-    setTimeout('sizeImg()', 1000)
-  
+	$("#pic").attr("src",imgsrc.target.result)
+	getPix=true
+	setTimeout("draw()",100)
+ 
 }
 
 
-$("#scale").on('change', function(e) {
+function makeRaster(){
 
-	document.getElementById("width").value = ((document.getElementById("scale").value)*(wmax*4)).toFixed(1)
-	document.getElementById("height").value = ((document.getElementById("scale").value)*(hmax*4)).toFixed(1)
+	var cs = (document.getElementById("height").value / 200)
+	cutDepth = document.getElementById("depth").value
+	var g = "g21\n"
 
-})
+	g+="g1f" + feedrate + "\n"
+	g+="g0z3\n"
 
+	for(i=0;i<raster.length;i+=3){
+
+		if(i%4==0){
+			for(j=0;j<raster[i].length;j++){
+				if(raster[i][j].length>4){
+				
+				g+="g0x" + raster[i][j][0]*cs + "y" + (0-raster[i][j][1])*cs + "\n"
+				g+="g1z" + cutDepth + "\n"
+				g+="g1x" + raster[i][j][raster[i][j].length-2]*cs + "y" + (0-raster[i][j][raster[i][j].length-1])*cs + "\n"
+				g+="g1z3\n"
+				}
+			}
+		}
+		
+		else{
+			
+			for(j=raster[i].length-1;j>=0;j--){
+
+				if(raster[i][j].length>4){
+				
+				g+="g0x" + raster[i][j][raster[i][j].length-2]*cs + "y" + (0-raster[i][j][raster[i][j].length-1])*cs + "\n"
+				g+="g1z-1\n"
+				g+="g1x" + raster[i][j][0]*cs + "y" + (-1-raster[i][j][1])*cs + "\n"
+				g+="g1z3\n"
+
+				}
+
+			}
+			
+		
+		}
+		
+
+	}
+
+	g+="g0x0y0\n"
+	g+="m30\n"
+	//console.log(g)
+
+	fabmo.submitJob({
+   	file : g,
+   	filename : "raster.g",
+   	name : "raster",
+		description : "raster"	
+	})
+
+
+}
+
+function makeOutline(){
+
+	var cs = (document.getElementById("height").value / 200)
+
+	cutDepth = document.getElementById("depth").value
+
+	g="g21\n"
+	g+="g1f" + feedrate + "\n"
+	g+="g0z3\n"
+
+	for(i=0;i<path.length;i++){
+		g+="g0x" + (path[i][0].X*cs) + "y" + (path[i][0].Y*cs) + "\n"
+		g+="g1z" + cutDepth + "\n"
+		for(j=0;j<path[i].length;j++){
+			g+="g1x" + (path[i][j].X*cs) + "y" + (path[i][j].Y*cs) + "\n"
+		}
+		g+="g1x" + (path[i][0].X*cs) + "y" + (path[i][0].Y*cs) + "\n"
+		g+="g0z3\n"
+	}
+
+	g+="g0x0y0\n"
+	g+="m30\n"
+
+	fabmo.submitJob({
+   	file : g,
+   	filename : "outline.g",
+   	name : "outline",
+		description : "outline"	
+	})
+
+}
 
 </script>
 
 
-</body>
-</html>
 

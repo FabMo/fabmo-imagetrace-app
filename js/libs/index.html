@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en"> 
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<script src="jquery.js"></script>
+		<script src="clipper.js"></script>
+		<script src="fabmo.min.js"></script>
+		<style>
+		body{
+			background:#eee;
+			font-family: arial;
+			font-size: 14px;
+		}
+		progress{
+			display: none;
+			width: 250px;
+			height: 20px;
+		}
+		img{
+			display: none;
+		}
+		#myCanvas{
+			position:absolute;
+			top: 60px;
+			background:#eee;
+		}
+		#myCanvas2{
+			display: none;
+		}
+		#submit_outline{
+			position: absolute;
+			left: 150px;
+		}
+		#submit_raster{
+			position: absolute;
+			left: 320px;
+		}
+		#settings{
+			display:none;
+		}
+		#invert{
+			position: absolute;
+			top: 270px;
+			left: 200px;
+		}
+		#mirror{
+			position: absolute;
+			top: 310px;
+			left: 200px;
+		}
+		#width{
+			position: absolute;
+			top: 270px;
+			left: 55px;
+			width: 75px;
+		}
+		width{
+			position: absolute;
+			top: 285px;
+		}
+		mm1{
+			position: absolute;
+			top: 285px;
+			left: 150px;
+		}
+		mm2{
+			position: absolute;
+			top: 325px;
+			left: 150px;
+		}
+		#height{
+			position: absolute;
+			top: 310px;
+			left: 55px;
+			width: 75px;
+		}
+		height{
+			position: absolute;
+			top: 325px;
+		}
+		#get{
+			position: absolute;
+		}
+		#file{
+   		display: none;
+		}
+		</style>
+	</head>
+	<body>
+		<input type="file" id="file" onchange="startRead()"/>
+		<input type="submit" id="get" value="load image" onclick="getFile()"/>
+
+		<input type="submit" id="settings" value="settings"/>
+
+		<input type="submit" id="submit_outline" value="cut outline" onclick="makeOutline()"/>
+
+		<input type="submit" id="submit_raster" value="cut raster" onclick="makeRaster()"/>
+		
+
+		<progress id="progress" value="0" max="100"></progress>
+		<p>
+
+		<canvas id="myCanvas"></canvas>
+		<canvas id="myCanvas2"></canvas>
+		<input type="submit" id="invert" value="invert" onclick="Invert()"/>
+		<input type="submit" id="mirror" value="mirror" onclick="Mirror()"/>
+
+		<input type="number" id="width" value="0" onchange="changeWidth()"/>
+		<width>width:</width>
+
+		<input type="number" id="height" value="100" onchange="changeHeight()" autocomplete="off"/>
+		<height>height:</height>
+		<mm1>mm</mm1>
+		<mm2>mm</mm2>
+
+		<img id="pic" src="cat.jpg"> 
+	</body>
+</html>
+
+<script>
+
+//TODO
+//
+//make outline
+//cut depth
+//tool diameter
+//
+
+//tabs
+//
+
+//raster angle
+//fade lines
+//
+
+var fabmo = new FabMoDashboard()
+
+var pix = new Object();
+var pix2 = new Object();
+
+var pix3 = new Array();
+var path = new Array();
+
+var raster = new Array();
+var getPix = true;
+var invert = false;
+var mirror = false;
+
+var sf2 = 1;
+
+function changeWidth(){
+	document.getElementById("height").value = ((document.getElementById("width").value*sf2).toFixed(0))
+}
+
+function changeHeight(){
+	document.getElementById("width").value = ((document.getElementById("height").value/sf2).toFixed(0))
+}
+
+function getFile(){
+	document.getElementById("file").click();
+}
+
+function Invert(){
+	if(invert==false){
+		invert=true;
+	}
+	else{
+		invert=false;
+	}
+	getPix=true;
+	draw();
+	getPix=false;
+}
+
+function Mirror(){
+	
+	if(mirror==false){
+		mirror=true;
+	}
+	else{
+		mirror=false;
+	}
+
+	draw();
+
+}
+
+function draw() {
+
+	var c = document.getElementById('myCanvas');
+	var ctx = c.getContext("2d");
+	
+	var c2 = document.getElementById('myCanvas2');
+	var ctx2 = c2.getContext("2d");
+
+	ctx.canvas.height = $(window).innerHeight()-70;
+	ctx.canvas.width = $(window).innerWidth()-20;
+
+	ctx2.canvas.height = $(window).innerHeight()-70;
+	ctx2.canvas.width = $(window).innerWidth()-20;
+
+	ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height)
+
+	
+	var img=document.getElementById("pic");
+
+	var imgHeight = 200;  //sample
+
+	var scale = 1;
+
+	var sf = imgHeight/img.height;
+	ctx2.drawImage(img,0,0,img.width*sf,imgHeight);
+
+	pix = ctx2.getImageData(0,0,img.width*sf,imgHeight);
+
+	ctx.putImageData(pix,0,0);
+
+	sf2 = img.height/img.width;
+
+	document.getElementById("submit_outline").style.left= img.width*sf + 15 + "px";
+	document.getElementById("submit_raster").style.left= img.width*sf*2 + 25 + "px";
+	//document.getElementById("invert").style.left= img.width*sf + 25 + "px";
+	//document.getElementById("mirror").style.left= img.width*sf + 25 + "px";
+
+	document.getElementById("width").value = ((document.getElementById("height").value/sf2).toFixed(0))
+
+	//document.getElementById("height").value = img.height*sf
+	//
+	//console.log(pix.width)
+
+	if(getPix==true){
+
+		getPix=false;
+
+		var pen = false;
+		var row = 0;
+
+
+		raster = []
+		path = []
+
+		pix2 = pix;
+		//console.log(pix2);
+		
+		if(invert==true){
+			var ulevel = 128
+			var llevel = 0
+		}
+		else{
+			var ulevel = 256
+			var llevel = 128
+		}
+
+		//0.3R+0.6G+0.1B
+		raster.push([[]]);
+
+		for(i=0;i<(pix.data.length);i=i+4){
+			//pix2.data[i+1]=255;
+			if( (((pix2.data[i]*0.3)+(pix2.data[i+1]*0.6)+(pix2.data[i+2]*0.1))>=llevel) && (((pix2.data[i]*0.3)+(pix2.data[i+1]*0.6)+(pix2.data[i+2]*0.1))<=ulevel)){
+
+				if(pen==true){
+					raster[raster.length-1].push([]);
+				}
+				pen=false;
+				
+				pix2.data[i]=255;
+				pix2.data[i+1]=255;
+				pix2.data[i+2]=255;
+
+			}
+			else{
+				pix2.data[i]=200;
+				pix2.data[i+1]=200;
+				pix2.data[i+2]=200;
+
+				pen=true;
+
+				if((Math.floor((i/4)/pix.width))>=row+1){
+					row=(Math.floor((i/4)/pix.width));
+					raster.push([[]]);
+				}
+
+				raster[raster.length-1][raster[raster.length-1].length-1].push( i/4-((Math.floor((i/4)/pix.width))*pix.width), Math.floor((i/4)/pix.width) );
+
+				path.push([
+					{X:((i/4-((Math.floor((i/4)/pix.width))*pix.width))), Y:((Math.floor((i/4)/pix.width)))},
+					{X:((i/4-((Math.floor((i/4)/pix.width))*pix.width))+1), Y:((Math.floor((i/4)/pix.width)))}, 
+					{X:((i/4-((Math.floor((i/4)/pix.width))*pix.width))+1), Y:((Math.floor((i/4)/pix.width))+1)},
+					{X:((i/4-((Math.floor((i/4)/pix.width))*pix.width))), Y:((Math.floor((i/4)/pix.width))+1)}
+				]);
+
+			}
+		}
+		
+		var cpr = new ClipperLib.Clipper()
+		cpr.AddPaths(path, ClipperLib.PolyType.ptSubject, true)
+
+		var solution_paths = new ClipperLib.Paths();
+		cpr.Execute(ClipperLib.ClipType.ctUnion, solution_paths, ClipperLib.PolyFillType.pftNonZero, ClipperLib.PolyFillType.pftNonZero);
+
+
+		path = ClipperLib.JS.Clean(solution_paths, 2);
+
+
+	}
+
+	//ctx.rect(1,0,img.width*sf,ctx.canvas.height);
+	//ctx.rect(img.width*sf,0,img.width*sf,ctx.canvas.height);
+	//ctx.stroke();
+
+	ctx.translate(img.width*sf+10,0);
+
+	ctx.strokeStyle="#000";
+
+	ctx.fillStyle="#fff";
+	ctx.rect(0,0,img.width*sf,img.height*sf);
+	ctx.fill();
+	
+	ctx.beginPath();
+
+	if(mirror==false){
+	
+	for(i=0;i<path.length;i++){
+		ctx.moveTo(path[i][0].X,path[i][0].Y);
+		for(j=0;j<path[i].length;j++){
+			ctx.lineTo(path[i][j].X,path[i][j].Y);
+		}
+		ctx.lineTo(path[i][0].X,path[i][0].Y);
+	}
+
+	}
+	else{
+
+	for(i=0;i<path.length;i++){
+		ctx.moveTo((img.width*sf)-path[i][0].X,path[i][0].Y);
+		for(j=0;j<path[i].length;j++){
+			ctx.lineTo((img.width*sf)-path[i][j].X,path[i][j].Y);
+		}
+		ctx.lineTo((img.width*sf)-path[i][0].X,path[i][0].Y);
+	}
+
+	}
+	//ctx.fill();
+	ctx.stroke();
+
+	ctx.translate(img.width*sf+10,0);
+
+	ctx.lineWidth=1;
+	ctx.beginPath();
+	ctx.rect(0,0,img.width*sf*scale,img.height*sf*scale);
+	ctx.fill();
+	console.log(raster);
+	
+	for(i=0;i<raster.length;i++){
+
+		ctx.beginPath();
+		if(mirror==false){
+
+		for(j=0;j<raster[i].length;j++){
+			ctx.moveTo(raster[i][j][0]*scale,raster[i][j][1]*scale);
+			for(k=0;k<raster[i][j].length;k+=2){
+				ctx.lineTo(raster[i][j][k]*scale,raster[i][j][k+1]*scale);
+			}
+		}
+
+		}
+		else{
+
+		for(j=0;j<raster[i].length;j++){
+			ctx.moveTo((img.width*sf)-raster[i][j][0]*scale,raster[i][j][1]*scale);
+			for(k=0;k<raster[i][j].length;k+=2){
+				ctx.lineTo((img.width*sf)-raster[i][j][k]*scale,raster[i][j][k+1]*scale);
+			}
+		}
+
+
+		}
+
+		if(i%2==0){
+			ctx.strokeStyle="#ff0000";
+			ctx.stroke();
+		}
+		else{
+			ctx.strokeStyle="#000";
+			ctx.stroke();
+		}
+	}
+	//ctx.stroke();
+}
+
+window.onload=draw();
+
+$(window).resize(function(){
+	draw();
+});
+
+function startRead() {
+    image = document.getElementById("file").files[0]
+    if (image) {
+        if (image.type.match("image.*")) {
+            getAsImage(image)
+            //alert("LOADING: " + image.name)
+        }
+        else {
+              alert("THAT IS NOT AN IMAGE FILE")
+        }
+    }
+
+}
+function getAsImage(readFile) {
+    var reader = new FileReader()
+    reader.readAsDataURL(readFile)
+    reader.onload = addImg
+}
+function addImg(imgsrc) {
+	$("#pic").attr("src",imgsrc.target.result)
+	getPix=true;
+	//draw();	
+	setTimeout("draw()",100);
+ 
+}
+
+
+function makeRaster(){
+
+	
+
+	var cs = (document.getElementById("height").value / 200)
+
+	var feedrate = 300;
+
+	var g = "g21\n"
+
+	g+="g1f300\n"
+
+	for(i=0;i<raster.length;i++){
+
+		if(i%2==0){
+			for(j=0;j<raster[i].length;j++){
+				if(raster[i][j].length>4){
+				
+				g+="g0x" + raster[i][j][0]*cs + "y" + (-1-raster[i][j][1])*cs + "\n"
+				g+="g1z-1\n"
+				g+="g1x" + raster[i][j][raster[i][j].length-2]*cs + "y" + (-1-raster[i][j][raster[i][j].length-1])*cs + "\n"
+				g+="g1z2\n"
+				}
+			}
+		}
+		else{
+			for(j=raster[i].length-2;j>=0;j--){
+				if(raster[i][j].length>4){
+				
+				g+="g0x" + raster[i][j][raster[i][j].length-2]*cs + "y" + (-1-raster[i][j][raster[i][j].length-1])*cs + "\n"
+				g+="g1z-1\n"
+				g+="g1x" + raster[i][j][0]*cs + "y" + (-1-raster[i][j][1])*cs + "\n"
+				g+="g1z2\n"
+				}
+			}
+		}
+
+	}
+
+	g+="m30\n"
+//console.log(g)
+
+	fabmo.submitJob({
+   	file : g,
+   	filename : "raster.g",
+   	name : "raster",
+		description : "raster"	
+	})
+
+
+}
+
+function makeOutline(){
+	console.log("todo")
+
+
+}
+
+</script>
+
+
+

@@ -1,0 +1,93 @@
+		body{
+			background:#eee;
+			font-family: arial;
+			font-size: 14px;
+		}
+		progress{
+			display: none;
+			width: 250px;
+			height: 20px;
+		}
+		img{
+			display: none;
+		}
+		#myCanvas{
+			position:absolute;
+			top: 60px;
+			background:#eee;
+		}
+		#myCanvas2{
+			display: none;
+		}
+		#submit_outline{
+			position: absolute;
+			left: 150px;
+		}
+		#submit_raster{
+			position: absolute;
+			left: 320px;
+		}
+		#settings{
+			display:none;
+		}
+		#invert{
+			position: absolute;
+			top: 270px;
+			left: 200px;
+		}
+		#mirror{
+			position: absolute;
+			top: 310px;
+			left: 200px;
+		}
+		#width{
+			position: absolute;
+			top: 270px;
+			left: 55px;
+			width: 75px;
+		}
+		width{
+			position: absolute;
+			top: 285px;
+		}
+		mm1{
+			position: absolute;
+			top: 285px;
+			left: 150px;
+		}
+		mm2{
+			position: absolute;
+			top: 325px;
+			left: 150px;
+		}
+		mm3{
+			position: absolute;
+			top: 365px;
+			left: 150px;
+		}
+		#height{
+			position: absolute;
+			top: 310px;
+			left: 55px;
+			width: 75px;
+		}
+		height{
+			position: absolute;
+			top: 325px;
+		}
+		depth{
+			position: absolute;
+			top: 365px;
+		}
+		#depth{
+			position: absolute;
+			top: 350px;
+			left: 55px;
+			width: 75px;
+		}
+		#get{
+			position: absolute;
+		}
+		#file{
+   		display: none;
+		}
