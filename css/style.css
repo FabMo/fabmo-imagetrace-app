@@ -45,24 +45,25 @@
 			top: 270px;
 			left: 55px;
 			width: 75px;
+			height: 21px;
 		}
 		width{
 			position: absolute;
-			top: 285px;
+			top: 280px;
 		}
 		mm1{
 			position: absolute;
-			top: 285px;
+			top: 280px;
 			left: 150px;
 		}
 		mm2{
 			position: absolute;
-			top: 325px;
+			top: 320px;
 			left: 150px;
 		}
 		mm3{
 			position: absolute;
-			top: 365px;
+			top: 360px;
 			left: 150px;
 		}
 		#height{
@@ -70,20 +71,22 @@
 			top: 310px;
 			left: 55px;
 			width: 75px;
+			height: 21px;
 		}
 		height{
 			position: absolute;
-			top: 325px;
+			top: 320px;
 		}
 		depth{
 			position: absolute;
-			top: 365px;
+			top: 360px;
 		}
 		#depth{
 			position: absolute;
 			top: 350px;
 			left: 55px;
 			width: 75px;
+			height: 21px;
 		}
 		#get{
 			position: absolute;
