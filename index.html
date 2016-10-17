@@ -9,7 +9,7 @@
 		<script src="js/libs/fabmo.min.js"></script>
 
 	</head>
-	<body>
+	<body onload="draw()">
 		<input type="file" id="file" onchange="startRead()"/>
 		<input type="submit" id="get" value="load image" onclick="getFile()"/>
 
@@ -140,7 +140,7 @@ function draw() {
 	var sf = imgHeight/img.height
 	ctx2.drawImage(img,0,0,img.width*sf,imgHeight)
 
-	pix = ctx2.getImageData(1,1,(img.width*sf).toFixed(0),imgHeight)
+	pix = ctx2.getImageData(0,0,(img.width*sf).toFixed(0),imgHeight)
 
 	ctx.putImageData(pix,0,0)
 
@@ -307,7 +307,7 @@ function draw() {
 
 }
 
-window.onload=draw();
+//window.onload=draw();
 
 $(window).resize(function(){
 	draw();
