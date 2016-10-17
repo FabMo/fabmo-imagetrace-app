@@ -353,11 +353,10 @@ function makeRaster(){
 		if(i%2==0){
 			for(j=0;j<raster[i].length;j++){
 				if(raster[i][j].length>4){
-				
-				g+="g0x" + raster[i][j][0]*cs + "y" + (0-raster[i][j][1])*cs + "\n"
-				g+="g1z" + cutDepth + "\n"
-				g+="g1x" + raster[i][j][raster[i][j].length-2]*cs + "y" + (0-raster[i][j][raster[i][j].length-1])*cs + "\n"
-				g+="g1z3\n"
+					g+="g0x" + raster[i][j][0]*cs + "y" + (0-raster[i][j][1])*cs + "\n"
+					g+="g1z" + cutDepth + "\n"
+					g+="g1x" + raster[i][j][raster[i][j].length-2]*cs + "y" + (0-raster[i][j][raster[i][j].length-1])*cs + "\n"
+					g+="g1z3\n"
 				}
 			}
 		}
@@ -367,12 +366,10 @@ function makeRaster(){
 			for(j=raster[i].length-1;j>=0;j--){
 
 				if(raster[i][j].length>4){
-				
-				g+="g0x" + raster[i][j][raster[i][j].length-2]*cs + "y" + (0-raster[i][j][raster[i][j].length-1])*cs + "\n"
-				g+="g1z-1\n"
-				g+="g1x" + raster[i][j][0]*cs + "y" + (-1-raster[i][j][1])*cs + "\n"
-				g+="g1z3\n"
-
+					g+="g0x" + raster[i][j][raster[i][j].length-2]*cs + "y" + (0-raster[i][j][raster[i][j].length-1])*cs + "\n"
+					g+="g1z-1\n"
+					g+="g1x" + raster[i][j][0]*cs + "y" + (0-raster[i][j][1])*cs + "\n"
+					g+="g1z3\n"
 				}
 
 			}
@@ -410,12 +407,12 @@ function makeOutline(){
 	g+="g4p3\n"
 
 	for(i=0;i<path.length;i++){
-		g+="g0x" + (path[i][0].X*cs) + "y" + (path[i][0].Y*cs) + "\n"
+		g+="g0x" + (path[i][0].X*cs) + "y" + (0-path[i][0].Y*cs) + "\n"
 		g+="g1z" + cutDepth + "\n"
 		for(j=0;j<path[i].length;j++){
-			g+="g1x" + (path[i][j].X*cs) + "y" + (path[i][j].Y*cs) + "\n"
+			g+="g1x" + (path[i][j].X*cs) + "y" + (0-path[i][j].Y*cs) + "\n"
 		}
-		g+="g1x" + (path[i][0].X*cs) + "y" + (path[i][0].Y*cs) + "\n"
+		g+="g1x" + (path[i][0].X*cs) + "y" + (0-path[i][0].Y*cs) + "\n"
 		g+="g0z3\n"
 	}
 	g+="m5\n"
