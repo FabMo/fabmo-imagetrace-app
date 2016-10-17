@@ -345,6 +345,8 @@ function makeRaster(){
 
 	g+="g1f" + feedrate + "\n"
 	g+="g0z3\n"
+	g+="m4\n"
+	g+="g4p3\n"
 
 	for(i=0;i<raster.length;i+=3){
 
@@ -380,7 +382,7 @@ function makeRaster(){
 		
 
 	}
-
+	g+="m5\n"
 	g+="g0x0y0\n"
 	g+="m30\n"
 	//console.log(g)
@@ -404,6 +406,8 @@ function makeOutline(){
 	g="g21\n"
 	g+="g1f" + feedrate + "\n"
 	g+="g0z3\n"
+	g+="m4\n"
+	g+="g4p3\n"
 
 	for(i=0;i<path.length;i++){
 		g+="g0x" + (path[i][0].X*cs) + "y" + (path[i][0].Y*cs) + "\n"
@@ -414,7 +418,7 @@ function makeOutline(){
 		g+="g1x" + (path[i][0].X*cs) + "y" + (path[i][0].Y*cs) + "\n"
 		g+="g0z3\n"
 	}
-
+	g+="m5\n"
 	g+="g0x0y0\n"
 	g+="m30\n"
 
