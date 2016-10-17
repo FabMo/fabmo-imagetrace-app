@@ -63,7 +63,7 @@
 
 var fabmo = new FabMoDashboard()
 
-var pix = new Object()
+var pix
 
 var path = new Array()
 var raster = new Array()
@@ -140,7 +140,7 @@ function draw() {
 	var sf = imgHeight/img.height
 	ctx2.drawImage(img,0,0,img.width*sf,imgHeight)
 
-	pix = ctx2.getImageData(0,0,img.width*sf,imgHeight)
+	pix = ctx2.getImageData(1,1,(img.width*sf).toFixed(0),imgHeight)
 
 	ctx.putImageData(pix,0,0)
 
