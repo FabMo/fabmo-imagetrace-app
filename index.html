@@ -19,8 +19,6 @@
 
 		<input type="submit" id="submit_raster" value="cut raster" onclick="makeRaster()"/>
 		
-		
-
 		<progress id="progress" value="0" max="100"></progress>
 		<p>
 
@@ -76,6 +74,7 @@ var feedrate = 500
 var cutDepth = -1
 
 var sf2 = 1
+var xmax
 
 function changeWidth(){
 	document.getElementById("height").value = ((document.getElementById("width").value*sf2).toFixed(0))
@@ -157,7 +156,6 @@ function draw() {
 
 		var pen = false
 		var row = 0
-
 
 		raster = []
 		path = []
@@ -269,6 +267,7 @@ function draw() {
 	ctx.fill()
 
 	//console.log(raster);
+	xmax=(img.width*sf)
 	
 	for(i=0;i<raster.length;i+=3){
 
@@ -353,32 +352,40 @@ function makeRaster(){
 		if(i%2==0){
 			for(j=0;j<raster[i].length;j++){
 				if(raster[i][j].length>4){
-					g+="g0x" + raster[i][j][0]*cs + "y" + (0-raster[i][j][1])*cs + "\n"
-					g+="g1z" + cutDepth + "\n"
-					g+="g1x" + raster[i][j][raster[i][j].length-2]*cs + "y" + (0-raster[i][j][raster[i][j].length-1])*cs + "\n"
+					if(mirror==false){
+						g+="g0x" + (raster[i][j][0]*cs).toFixed(3) + "y" + ((0-raster[i][j][1])*cs).toFixed(3) + "\n"
+						g+="g1z" + cutDepth + "\n"
+						g+="g1x" + (raster[i][j][raster[i][j].length-2]*cs).toFixed(3) + "y" + ((0-raster[i][j][raster[i][j].length-1])*cs).toFixed(3) + "\n"
+					}
+					else{
+						g+="g0x" + ((xmax*cs)-raster[i][j][0]*cs).toFixed(3) + "y" + ((0-raster[i][j][1])*cs).toFixed(3) + "\n"
+						g+="g1z" + cutDepth + "\n"
+						g+="g1x" + ((xmax*cs)-raster[i][j][raster[i][j].length-2]*cs).toFixed(3) + "y" + ((0-raster[i][j][raster[i][j].length-1])*cs).toFixed(3) + "\n"
+					}
 					g+="g1z3\n"
 				}
 			}
 		}
 		
 		else{
-			
 			for(j=raster[i].length-1;j>=0;j--){
-
 				if(raster[i][j].length>4){
-					g+="g0x" + raster[i][j][raster[i][j].length-2]*cs + "y" + (0-raster[i][j][raster[i][j].length-1])*cs + "\n"
-					g+="g1z-1\n"
-					g+="g1x" + raster[i][j][0]*cs + "y" + (0-raster[i][j][1])*cs + "\n"
+					if(mirror==false){
+						g+="g0x" + (raster[i][j][raster[i][j].length-2]*cs).toFixed(3) + "y" + ((0-raster[i][j][raster[i][j].length-1])*cs).toFixed(3) + "\n"
+						g+="g1z" + cutDepth + "\n"
+						g+="g1x" + (raster[i][j][0]*cs).toFixed(3) + "y" + ((0-raster[i][j][1])*cs).toFixed(3) + "\n"
+					}
+					else{
+						g+="g0x" + ((xmax*cs)-raster[i][j][raster[i][j].length-2]*cs).toFixed(3) + "y" + ((0-raster[i][j][raster[i][j].length-1])*cs).toFixed(3) + "\n"
+						g+="g1z" + cutDepth + "\n"
+						g+="g1x" + ((xmax*cs)-raster[i][j][0]*cs).toFixed(3) + "y" + ((0-raster[i][j][1])*cs).toFixed(3) + "\n"
+					}
 					g+="g1z3\n"
 				}
-
-			}
-			
-		
-		}
-		
-
+			}		
+		}	
 	}
+
 	g+="m5\n"
 	g+="g0x0y0\n"
 	g+="m30\n"

@@ -22,10 +22,12 @@
 		#submit_outline{
 			position: absolute;
 			left: 150px;
+			height: 32px;
 		}
 		#submit_raster{
 			position: absolute;
 			left: 320px;
+			height: 32px;
 		}
 		#settings{
 			display:none;
@@ -34,11 +36,13 @@
 			position: absolute;
 			top: 270px;
 			left: 200px;
+			height: 32px;
 		}
 		#mirror{
 			position: absolute;
 			top: 310px;
 			left: 200px;
+			height: 32px;
 		}
 		#width{
 			position: absolute;
@@ -90,6 +94,7 @@
 		}
 		#get{
 			position: absolute;
+			height: 32px;
 		}
 		#file{
    		display: none;
