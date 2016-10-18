@@ -75,6 +75,7 @@ var cutDepth = -1
 
 var sf2 = 1
 var xmax
+var smooth = true
 
 function changeWidth(){
 	document.getElementById("height").value = ((document.getElementById("width").value*sf2).toFixed(0))
@@ -218,10 +219,54 @@ function draw() {
 		var solution_paths = new ClipperLib.Paths()
 		cpr.Execute(ClipperLib.ClipType.ctUnion, solution_paths, ClipperLib.PolyFillType.pftNonZero, ClipperLib.PolyFillType.pftNonZero)
 
-
 		path = ClipperLib.JS.Clean(solution_paths, 2)
 
+	xmax=(img.width*sf)
+	var ymax = (img.height*sf)
+	//
+	if(smooth==true){
 
+	var outline = []
+	var smoothPath = []
+	
+
+	for(i=0;i<path.length;i++){
+
+	outline.push([])	
+	var n = 0	
+
+	while(n<2){
+		for(j=0;j<path[i].length-1;j++){
+			var p0 = path[i][j]
+			var p1 = path[i][j+1]
+			var p0x = p0.X,
+				 p0y = p0.Y,
+				 p1x = p1.X,
+			    p1y = p1.Y
+			if( (p0.X>0) && (p0.Y>0) && (p1.X>0) && (p1.Y>0) && (p0.Y<(xmax)-1) && (p1.Y<(ymax)-1) ){
+				 smoothPath.push({X:(0.75*p0x+0.25*p1x),Y:(0.75*p0y+0.25*p1y)})
+				 smoothPath.push({X:(0.25*p0x+0.75*p1x),Y:(0.25*p0y+0.75*p1y)})
+			}
+			else{
+				smoothPath.push({X:p0.X,Y:p0.Y})
+				smoothPath.push({X:p1.X,Y:p1.Y})
+			}	
+
+		}
+		path[i]=(smoothPath)
+		smoothPath=[]
+		n++
+	}
+
+	
+
+}
+
+console.log(path)
+	
+
+	}
+	//
 	}
 
 	ctx.translate(img.width*sf+10,0)
@@ -267,7 +312,7 @@ function draw() {
 	ctx.fill()
 
 	//console.log(raster);
-	xmax=(img.width*sf)
+	
 	
 	for(i=0;i<raster.length;i+=3){
 
@@ -397,7 +442,6 @@ function makeRaster(){
    	name : "raster",
 		description : "raster"	
 	})
-
 
 }
 
