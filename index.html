@@ -47,7 +47,7 @@
 
 //TODO
 
-//
+//smooth outline path
 //raster line spacing
 //tool diameter
 //
@@ -414,12 +414,22 @@ function makeOutline(){
 	g+="g4p3\n"
 
 	for(i=0;i<path.length;i++){
-		g+="g0x" + (path[i][0].X*cs) + "y" + (0-path[i][0].Y*cs) + "\n"
-		g+="g1z" + cutDepth + "\n"
-		for(j=0;j<path[i].length;j++){
-			g+="g1x" + (path[i][j].X*cs) + "y" + (0-path[i][j].Y*cs) + "\n"
+		if(mirror==false){
+			g+="g0x" + (path[i][0].X*cs).toFixed(3) + "y" + (0-path[i][0].Y*cs).toFixed(3) + "\n"
+			g+="g1z" + cutDepth + "\n"
+			for(j=0;j<path[i].length;j++){
+				g+="g1x" + (path[i][j].X*cs).toFixed(3) + "y" + (0-path[i][j].Y*cs).toFixed(3) + "\n"
+			}
+			g+="g1x" + (path[i][0].X*cs).toFixed(3) + "y" + (0-path[i][0].Y*cs).toFixed(3) + "\n"
 		}
-		g+="g1x" + (path[i][0].X*cs) + "y" + (0-path[i][0].Y*cs) + "\n"
+		else{
+			g+="g0x" + ((xmax*cs)-(path[i][0].X*cs)).toFixed(3) + "y" + (0-path[i][0].Y*cs).toFixed(3) + "\n"
+			g+="g1z" + cutDepth + "\n"
+			for(j=0;j<path[i].length;j++){
+				g+="g1x" + ((xmax*cs)-(path[i][j].X*cs)).toFixed(3) + "y" + (0-path[i][j].Y*cs).toFixed(3) + "\n"
+			}
+			g+="g1x" + ((xmax*cs)-(path[i][0].X*cs)).toFixed(3) + "y" + (0-path[i][0].Y*cs).toFixed(3) + "\n"
+		}
 		g+="g0z3\n"
 	}
 	g+="m5\n"
