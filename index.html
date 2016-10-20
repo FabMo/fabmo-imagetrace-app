@@ -46,15 +46,12 @@
 <script>
 
 //TODO
-
 //
 //raster line spacing
 //tool diameter
 //
-
 //tabs
 //
-
 //raster angle
 //fade lines
 //
@@ -260,9 +257,10 @@ function draw() {
 
 	}
 
-	console.log(path)
-	
 
+	raster.reverse();
+	//console.log(raster)
+	//console.log(path)
 	}
 	
 	}
@@ -431,7 +429,7 @@ function makeRaster(){
 	}
 
 	g+="m5\n"
-	g+="g0x0y" + (ymax+6.35) + "\n"
+	g+="g0y" + (ymax+6.35) + "\n"
 	g+="m30\n"
 	//console.log(g)
 
@@ -476,7 +474,7 @@ function makeOutline(){
 		g+="g0z3\n"
 	}
 	g+="m5\n"
-	g+="g0x0y" + (ymax+6.35) + "\n"
+	g+="g0y" + (ymax+6.35) + "\n"
 	g+="m30\n"
 
 	fabmo.submitJob({
