@@ -1,10 +1,17 @@
+
 {
 	"name":"ImageTrace",
+	"repository":"https://github.com/FabMo/fabmo-imagetrace-app.git",
+	"license":"MIT",
 	"main":"./index.html",
 	"icon":"icon.png",
-	"icon_color":"white",
-	"version":"0.0.1",
+	"icon_color":"#fff",
+	"version":"1.0.0",
 	"author":"Jonathan Ward",
-	"website":"http://github.com/FabMo/",
-	"description":"ImageTrace"
+	"website":"http://gofabmo.org/fabmo-imagetrace-app",
+	"description":"image to gcode",
+	"devDependencies": {
+    	"grunt": "^0.4.5",
+    	"grunt-zip": "^0.17.1"
+  	}
 }
